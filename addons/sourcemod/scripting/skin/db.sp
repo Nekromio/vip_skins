@@ -85,6 +85,9 @@ public void ConnectClient_Callback(Database hDatabaseLocal, DBResultSet hResults
 		{
 			skin[client].Reset();
 
+			//Проверяем какие скины доступны, для установки стандартных значений
+			DefaultSkin(client);
+
 			char sQuery[512], sSteam[32];
 			GetClientAuthId(client, AuthId_Steam2, sSteam, sizeof(sSteam));
 			FormatEx(sQuery, sizeof(sQuery), "INSERT INTO `vip_skins` (`steam_id`, `skin_name_t`, `skin_name_ct`, `skin_model_t`, `skin_model_ct`, `skin_enable_t`, `skin_enable_ct`, `skin_enable_all`)\
@@ -131,26 +134,55 @@ public void SaveSettings_Callback(Database hDatabaseLocal, DBResultSet hResults,
 
 stock void DefaultSkin(int client)
 {
-	getGroupSkin(client);
+	GetListModels(client);
 
 	char sBuffer[512];
 
-	list[client].name_t.GetString(0, sBuffer, sizeof(sBuffer));
-	//skin[client].name_t = sBuffer;
-	PrintToChatAll("Проверка");
-	PrintToChatAll("Первый скин это имя [%s]", sBuffer);
-	list[client].model_t.GetString(0, sBuffer, sizeof(sBuffer));
-	//skin[client].model_t = sBuffer;
-	PrintToChatAll("Первый скин это модель [%s]", sBuffer);
+	skin[client].enable_t = true;
+	skin[client].enable_ct = true;
 
-	PrintToChatAll("Весь список:");
+	if(list[client].name_t.Length)
+	{
+		PrintToChatAll("Список содержит [%d]", list[client].name_t.Length);
+		LogToFile(sFile, "Список содержит [%d]", list[client].name_t.Length);
+
+		list[client].name_t.GetString(0, sBuffer, sizeof(sBuffer));
+		//skin[client].name_t = sBuffer;
+		//PrintToChatAll("Проверка");
+
+		//PrintToChatAll("Первый скин это имя [%s]", sBuffer);
+		skin[client].name_t = sBuffer;
+		LogToFile(sFile, "Установлен по стандарту скин для имя Т [%s]", sBuffer);
+
+		list[client].model_t.GetString(0, sBuffer, sizeof(sBuffer));
+		skin[client].model_t = sBuffer;
+		PrintToChatAll("Установлен по стандарту скин для Т [%s]", sBuffer);
+		LogToFile(sFile, "Установлен по стандарту скин для Т [%s]", sBuffer);
+	}	
+
+	if(list[client].name_ct.Length)
+	{
+		list[client].name_ct.GetString(0, sBuffer, sizeof(sBuffer));
+		//PrintToChatAll("Первый скин это имя [%s]", sBuffer);
+		skin[client].name_ct = sBuffer;
+		LogToFile(sFile, "Установлен по стандарту скин для имя КТ [%s]", sBuffer);
+
+		list[client].model_ct.GetString(0, sBuffer, sizeof(sBuffer));
+		skin[client].model_ct = sBuffer;
+		PrintToChatAll("Установлен по стандарту скин для КТ [%s]", sBuffer);
+		LogToFile(sFile, "Установлен по стандарту скин для КТ [%s]", sBuffer);
+	}
+	
+
+	
+	/* PrintToChatAll("Весь список:"); */
 
 	//int size = g_hGlobalArray.Length
 
-	for(int i = 0; i < list[client].name_t.Length; i++)
+	/* for(int i = 0; i < list[client].name_t.Length; i++)
 	{
 		list[client].name_t.GetString(0, sBuffer, sizeof(sBuffer));
 		PrintToChatAll("[%s]", sBuffer);
-	}
+	} */
 
 }

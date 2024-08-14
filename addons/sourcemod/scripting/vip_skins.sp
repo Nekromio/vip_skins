@@ -44,9 +44,9 @@ enum struct Settings
 		this.name_ct = "";
 		this.model_t = "";
 		this.model_ct = "";
-		this.enable_t = false;
-		this.enable_ct = false;
-		this.enable = false;
+		this.enable_t = true;
+		this.enable_ct = true;
+		this.enable = true;
 	}
 }
 
@@ -175,7 +175,7 @@ public Plugin myinfo =
 	name = "[ViP Core] Player Skins",
 	author = "Nek.'a 2x2 | ggwp.site",
 	description = "Player Skins",
-	version = "1.0.0 102",
+	version = "1.0.0 103",
 	url = "https://ggwp.site/"
 };
 
@@ -281,24 +281,28 @@ Action Cmd_Skin(int client, any args)
 
 public void OnClientPostAdminCheck(int client)
 {
-	if(!cvEnable.BoolValue || !IsFakeClient(client))
-	{
-		if(!VIP_IsClientVIP(client) || !VIP_IsClientFeatureUse(client, g_sFeatureSkin[0]))
-			return;
+	if(!cvEnable.BoolValue || IsFakeClient(client))
+		return;
 
-		char sQuery[512], sSteam[32];
-		GetClientAuthId(client, AuthId_Steam2, sSteam, sizeof(sSteam), true);
-		FormatEx(sQuery, sizeof(sQuery), "SELECT `skin_name_t`, `skin_name_ct`, `skin_model_t`, `skin_model_ct`,\
-		`skin_enable_t`, `skin_enable_ct` FROM `vip_skin` WHERE `steam_id` = '%s'", sSteam);
-		hDatabase.Query(ConnectClient_Callback, sQuery, GetClientUserId(client));
-	}
+	LogToFile(sFile, "Игрок [%N] подключился к серверу", client);
+
+	/* if(!VIP_IsClientVIP(client) || !VIP_IsClientFeatureUse(client, g_sFeatureSkin[0]))
+		return; */
+
+	LogToFile(sFile, "Игрок [%N] подключился к серверу и является випом!", client);
+
+	char sQuery[512], sSteam[32];
+	GetClientAuthId(client, AuthId_Steam2, sSteam, sizeof(sSteam), true);
+	FormatEx(sQuery, sizeof(sQuery), "SELECT `skin_name_t`, `skin_name_ct`, `skin_model_t`, `skin_model_ct`,\
+	`skin_enable_t`, `skin_enable_ct` FROM `vip_skins` WHERE `steam_id` = '%s'", sSteam);
+	hDatabase.Query(ConnectClient_Callback, sQuery, GetClientUserId(client));
+
 }
 
 public void OnClientDisconnect(int client)
 {
 	delete hTimerSetSkin[client];
 	SaveSettings(client);
-	ResetClientSettings(client);
 }
 
 public void VIP_OnPlayerSpawn(int client, int iTeam, bool bIsVIP)
@@ -323,15 +327,10 @@ Action Timer_SetSkin(Handle hTimer, int UserId)
 	return Plugin_Continue;
 }
 
-stock void ResetClientSettings(int client)
-{
-	list[client].Reset();
-}
-
 //Наполняем список моделей данной группы пользователя
 stock void GetListModels(int client)
 {
-	ResetClientSettings(client);
+	list[client].Reset();
 
 	char text[512];
 	VIP_GetClientFeatureString(client, g_sFeatureSkin[0], text, sizeof(text));
@@ -382,6 +381,13 @@ stock void getGroupSkin(int client)
 				list[client].name_t.PushString(sBuffer[2]);
 				list[client].model_t.PushString(sBuffer[3]);
 			}
+		}
+
+		//Получаем скины для КТ
+		for(int j = 0; j < listAll.id_ct.Length; j++)
+		{
+			//Узнаем id для сравнения
+			list[client].id.GetString(i, sBuffer[0], sizeof(sBuffer[]));
 
 			//Узначем с чем сравнивать
 			listAll.id_ct.GetString(j, sBuffer[1], sizeof(sBuffer[]));
@@ -416,30 +422,13 @@ stock void SetModel(int client)
 	{
 		/* LogToFile(sFile, "Установка игроку Т [%N] скина [%s]", client, skin[client].model_t);
 		PrintToChatAll("Установка игроку [%N] скина [%s]", client, skin[client].model_t); */
-		if(IsModelPrecached(skin[client].model_t))
-		{
-			SetEntityModel(client, skin[client].model_t);
-		}
-		/* else
-		{
-			PrecacheModel(skin[client].model_t);
-			SetEntityModel(client, skin[client].model_t);
-		} */
-		
+		SetEntityModel(client, skin[client].model_t);
 	}
 	else if(skin[client].enable_ct && team == 3 && skin[client].model_ct[0])
 	{
 		/* LogToFile(sFile, "Установка игроку КТ [%N] скина [%s]", client, skin[client].model_ct);
 		PrintToChatAll("Установка игроку [%N] скина [%s]", client, skin[client].model_ct); */
-		if(IsModelPrecached(skin[client].model_ct))
-		{
-			SetEntityModel(client, skin[client].model_ct);
-		}
-		/* else
-		{
-			PrecacheModel(skin[client].model_ct);
-			SetEntityModel(client, skin[client].model_ct);
-		} */
+		SetEntityModel(client, skin[client].model_ct);
 	}
 }
 
