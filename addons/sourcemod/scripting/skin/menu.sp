@@ -6,7 +6,7 @@ void CreatMenu_Base(int client)
 		
 	//SkinStatus(client);
 	
-	GetListModels(client);
+	dataUpdate(client);
 
 	Menu hMenu = new Menu(Menu_Base);
 

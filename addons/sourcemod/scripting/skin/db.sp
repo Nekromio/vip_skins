@@ -80,13 +80,19 @@ public void ConnectClient_Callback(Database hDatabaseLocal, DBResultSet hResults
 					case 6: skin[client].enable = view_as<bool>(StringToInt(sValue));
 				}
 			}
+
+			//Обновляем данные о моделях
+			dataUpdate(client);
+
+			//Проверяем актуальность установленных моделей
+			correctionSkin(client);
 		}
 		else
 		{
-			skin[client].Reset();
-
-			//Проверяем какие скины доступны, для установки стандартных значений
-			DefaultSkin(client);
+			//Обновляем данные о моделях
+			dataUpdate(client);
+			//Устанавливаем саму первую модель и активируем
+			setDefaultSkin(client);
 
 			char sQuery[512], sSteam[32];
 			GetClientAuthId(client, AuthId_Steam2, sSteam, sizeof(sSteam));
@@ -107,7 +113,6 @@ public void ClietnAddDB_Callback(Database hDatabaseLocal, DBResultSet hResults, 
 		LogError("ClietnAddDB_Callback: %s", sError); //
 		return; //
 	}
-	//LogToFile(sFile, "Игрок [%N] успешно добавлен в базу данных!", GetClientOfUserId(iUserID));
 }
 
 void SaveSettings(int client)
@@ -132,57 +137,11 @@ public void SaveSettings_Callback(Database hDatabaseLocal, DBResultSet hResults,
 	}
 }
 
-stock void DefaultSkin(int client)
+void QueryConnect(int client)
 {
-	GetListModels(client);
-
-	char sBuffer[512];
-
-	skin[client].enable_t = true;
-	skin[client].enable_ct = true;
-
-	if(list[client].name_t.Length)
-	{
-		PrintToChatAll("Список содержит [%d]", list[client].name_t.Length);
-		LogToFile(sFile, "Список содержит [%d]", list[client].name_t.Length);
-
-		list[client].name_t.GetString(0, sBuffer, sizeof(sBuffer));
-		//skin[client].name_t = sBuffer;
-		//PrintToChatAll("Проверка");
-
-		//PrintToChatAll("Первый скин это имя [%s]", sBuffer);
-		skin[client].name_t = sBuffer;
-		LogToFile(sFile, "Установлен по стандарту скин для имя Т [%s]", sBuffer);
-
-		list[client].model_t.GetString(0, sBuffer, sizeof(sBuffer));
-		skin[client].model_t = sBuffer;
-		PrintToChatAll("Установлен по стандарту скин для Т [%s]", sBuffer);
-		LogToFile(sFile, "Установлен по стандарту скин для Т [%s]", sBuffer);
-	}	
-
-	if(list[client].name_ct.Length)
-	{
-		list[client].name_ct.GetString(0, sBuffer, sizeof(sBuffer));
-		//PrintToChatAll("Первый скин это имя [%s]", sBuffer);
-		skin[client].name_ct = sBuffer;
-		LogToFile(sFile, "Установлен по стандарту скин для имя КТ [%s]", sBuffer);
-
-		list[client].model_ct.GetString(0, sBuffer, sizeof(sBuffer));
-		skin[client].model_ct = sBuffer;
-		PrintToChatAll("Установлен по стандарту скин для КТ [%s]", sBuffer);
-		LogToFile(sFile, "Установлен по стандарту скин для КТ [%s]", sBuffer);
-	}
-	
-
-	
-	/* PrintToChatAll("Весь список:"); */
-
-	//int size = g_hGlobalArray.Length
-
-	/* for(int i = 0; i < list[client].name_t.Length; i++)
-	{
-		list[client].name_t.GetString(0, sBuffer, sizeof(sBuffer));
-		PrintToChatAll("[%s]", sBuffer);
-	} */
-
+	char sQuery[512], sSteam[32];
+	GetClientAuthId(client, AuthId_Steam2, sSteam, sizeof(sSteam), true);
+	FormatEx(sQuery, sizeof(sQuery), "SELECT `skin_name_t`, `skin_name_ct`, `skin_model_t`, `skin_model_ct`,\
+	`skin_enable_t`, `skin_enable_ct` FROM `vip_skins` WHERE `steam_id` = '%s'", sSteam);
+	hDatabase.Query(ConnectClient_Callback, sQuery, GetClientUserId(client));
 }

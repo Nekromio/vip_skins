@@ -18,15 +18,8 @@ Handle
 
 char
 	sFile[512],
-	sSection[512];
-
-static const char g_sFeatureSkin[][] = {"Skin_List", "Skin_Menu"};
-
-enum
-{
-	team_t,
-	team_ct
-}
+	sSection[512],
+	g_sFeatureSkin[][] = {"Skin_List", "Skin_Menu"};
 
 enum struct Settings
 {
@@ -169,13 +162,14 @@ Models list[MAXPLAYERS+1];
 #include "skin/menu.sp"
 #include "skin/db.sp"
 #include "skin/key.sp"
+#include "skin/function.sp"
 
 public Plugin myinfo = 
 {
 	name = "[ViP Core] Player Skins",
 	author = "Nek.'a 2x2 | ggwp.site",
 	description = "Player Skins",
-	version = "1.0.0 103",
+	version = "1.0.0 104",
 	url = "https://ggwp.site/"
 };
 
@@ -269,14 +263,18 @@ Action Cmd_Skin(int client, any args)
 		return Plugin_Continue;
 
 	if(!VIP_IsClientVIP(client) || !VIP_IsClientFeatureUse(client, g_sFeatureSkin[0]))
-		return Plugin_Continue;
+		return Plugin_Handled;
 
-	//Проверку на випа
 	CreatMenu_Base(client);
 
-	DefaultSkin(client);
-
 	return Plugin_Handled;
+}
+
+public void VIP_OnVIPClientAdded(int client, int admin)
+{
+	//LogToFile(sFile, "Игроком [%N] получен ViP | Статус функции [%d]", client, VIP_IsClientFeatureUse(client, g_sFeatureSkin[0]));
+
+	QueryConnect(client);
 }
 
 public void OnClientPostAdminCheck(int client)
@@ -284,19 +282,7 @@ public void OnClientPostAdminCheck(int client)
 	if(!cvEnable.BoolValue || IsFakeClient(client))
 		return;
 
-	LogToFile(sFile, "Игрок [%N] подключился к серверу", client);
-
-	/* if(!VIP_IsClientVIP(client) || !VIP_IsClientFeatureUse(client, g_sFeatureSkin[0]))
-		return; */
-
-	LogToFile(sFile, "Игрок [%N] подключился к серверу и является випом!", client);
-
-	char sQuery[512], sSteam[32];
-	GetClientAuthId(client, AuthId_Steam2, sSteam, sizeof(sSteam), true);
-	FormatEx(sQuery, sizeof(sQuery), "SELECT `skin_name_t`, `skin_name_ct`, `skin_model_t`, `skin_model_ct`,\
-	`skin_enable_t`, `skin_enable_ct` FROM `vip_skins` WHERE `steam_id` = '%s'", sSteam);
-	hDatabase.Query(ConnectClient_Callback, sQuery, GetClientUserId(client));
-
+	QueryConnect(client);
 }
 
 public void OnClientDisconnect(int client)
@@ -325,114 +311,4 @@ Action Timer_SetSkin(Handle hTimer, int UserId)
 	SetModel(client);
 
 	return Plugin_Continue;
-}
-
-//Наполняем список моделей данной группы пользователя
-stock void GetListModels(int client)
-{
-	list[client].Reset();
-
-	char text[512];
-	VIP_GetClientFeatureString(client, g_sFeatureSkin[0], text, sizeof(text));
-	//PrintToChatAll("Вывод: [%s]", text);
-
-	char sBuffer[32][32];
-
-	int count = ExplodeString(text, ";", sBuffer, sizeof(sBuffer[]), sizeof(sBuffer[]));
-
-	for(int i = 0; i < count; i++) if(sBuffer[i][0])
-	{
-		TrimString(sBuffer[i]);
-		list[client].id.PushString(sBuffer[i]);
-		PrintToChatAll("Фильтр: [%s]", sBuffer[i]);
-	}
-
-	getGroupSkin(client);
-}
-
-//	Фильтруем весь список доступных моделей группы польователя
-//	На доступ т и кт
-stock void getGroupSkin(int client)
-{
-	char sBuffer[4][512];
-	for(int i = 0; i < list[client].id.Length; i++)
-	{
-		//Получаем скины для Т
-		for(int j = 0; j < listAll.id_t.Length; j++)
-		{
-			//Узнаем id для сравнения
-			list[client].id.GetString(i, sBuffer[0], sizeof(sBuffer[]));
-
-			//Узначем id с каким сравнивать
-			listAll.id_t.GetString(j, sBuffer[1], sizeof(sBuffer[]));
-
-			if(!strcmp(sBuffer[0], sBuffer[1]))
-			{
-				//Узнаем имя
-				listAll.name_t.GetString(j, sBuffer[2], sizeof(sBuffer[]));
-
-				//Узнаем модель
-				listAll.model_t.GetString(j, sBuffer[3], sizeof(sBuffer[]));
-				
-				//PrintToChatAll("Сравнение |Т| найдено [%s] -> [%s]", sBuffer[0], sBuffer[1]);
-				//PrintToChatAll("А именно: \nИмя [%s] \nПуть [%s]", sBuffer[2], sBuffer[3]);
-
-				list[client].id_t.PushString(sBuffer[1]);
-				list[client].name_t.PushString(sBuffer[2]);
-				list[client].model_t.PushString(sBuffer[3]);
-			}
-		}
-
-		//Получаем скины для КТ
-		for(int j = 0; j < listAll.id_ct.Length; j++)
-		{
-			//Узнаем id для сравнения
-			list[client].id.GetString(i, sBuffer[0], sizeof(sBuffer[]));
-
-			//Узначем с чем сравнивать
-			listAll.id_ct.GetString(j, sBuffer[1], sizeof(sBuffer[]));
-
-			if(!strcmp(sBuffer[0], sBuffer[1]))
-			{
-				//Узнаем имя
-				listAll.name_ct.GetString(j, sBuffer[2], sizeof(sBuffer[]));
-
-				//Узнаем модель
-				listAll.model_ct.GetString(j, sBuffer[3], sizeof(sBuffer[]));
-				
-				//PrintToChatAll("Сравнение |Т| найдено [%s] -> [%s]", sBuffer[0], sBuffer[1]);
-				//PrintToChatAll("А именно: \nИмя [%s] \nПуть [%s]", sBuffer[2], sBuffer[3]);
-
-				list[client].id_ct.PushString(sBuffer[1]);
-				list[client].name_ct.PushString(sBuffer[2]);
-				list[client].model_ct.PushString(sBuffer[3]);
-			}
-		}
-	}
-}
-
-stock void SetModel(int client)
-{
-	if(!client || IsFakeClient(client))
-		return;
-
-	int team = GetClientTeam(client);
-
-	if(skin[client].enable_t && team == 2 && skin[client].model_t[0])
-	{
-		/* LogToFile(sFile, "Установка игроку Т [%N] скина [%s]", client, skin[client].model_t);
-		PrintToChatAll("Установка игроку [%N] скина [%s]", client, skin[client].model_t); */
-		SetEntityModel(client, skin[client].model_t);
-	}
-	else if(skin[client].enable_ct && team == 3 && skin[client].model_ct[0])
-	{
-		/* LogToFile(sFile, "Установка игроку КТ [%N] скина [%s]", client, skin[client].model_ct);
-		PrintToChatAll("Установка игроку [%N] скина [%s]", client, skin[client].model_ct); */
-		SetEntityModel(client, skin[client].model_ct);
-	}
-}
-
-bool IsValideClient(int client)
-{
-	return 0 < client <= MaxClients && IsClientInGame(client) && !IsFakeClient(client);
 }
