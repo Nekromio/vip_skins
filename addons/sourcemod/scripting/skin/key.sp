@@ -18,15 +18,20 @@ void ProcessConfigFile(const char[] file)
 bool Key_Settings(const char[] file)
 {
     SMCParser hParser = new SMCParser();
-    char error[128];
+    char error[256];
     int line = 0, col = 0;
+
+    listAll.Reset();
   
     hParser.OnEnterSection = Config_NewSection;
     hParser.OnLeaveSection = Config_EndSection;
     hParser.OnKeyValue = Config_KeyValue;
     hParser.OnEnd = Config_End;
-  
+    
     SMCError result = SMC_ParseFile(hParser, file, line, col);
+
+    //LogToFile(sFile, "Првоерка 1 | listAll.name_t = [%d]", listAll.name_t.Length);
+
     CloseHandle(hParser);
 
     if(result != SMCError_Okay)
@@ -45,7 +50,7 @@ public SMCResult Config_NewSection(Handle parser, const char[] section, bool quo
         return SMCParse_Continue;
     }
     Format(sSection, sizeof(sSection), section);
-
+    ////LogToFile(sFile, "sSection [%s]", sSection);
     return SMCParse_Continue;
 }
 
@@ -56,23 +61,25 @@ public SMCResult Config_KeyValue(Handle parser, char[] key, char[] value, bool k
     if(StrEqual(key, "name", false))
     {
         Format(sName, sizeof(sName), value);
-        //LogToFile(sFile, "Имя модели [%s]", sName);
+        ////LogToFile(sFile, "Имя модели [%s]", sName);
     }
     else if(StrEqual(key, "model", false))
     {
         Format(sModel, sizeof(sModel), value);
-        //LogToFile(sFile, "Путь mdl [%s]", sModel);
+        ////LogToFile(sFile, "Путь mdl [%s]", sModel);
     }
     else if(StrEqual(key, "team", false))
     {
         if(StrEqual(value, "t", false))
         {
+            ////LogToFile(sFile, "Првоерка 2 Т | listAll.name_t = [%s]", sName);
             listAll.id_t.PushString(sSection);
             listAll.name_t.PushString(sName);
             listAll.model_t.PushString(sModel);
         }
         else if(StrEqual(value, "ct", false))
         {
+            ////LogToFile(sFile, "Првоерка 2 КТ | listAll.name_t = [%s]", sName);
             listAll.id_ct.PushString(sSection);
             listAll.name_ct.PushString(sName);
             listAll.model_ct.PushString(sModel);

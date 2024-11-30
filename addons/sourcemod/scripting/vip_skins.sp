@@ -16,17 +16,20 @@ ConVar
 Handle
 	hTimerSetSkin[MAXPLAYERS+1];
 
+int
+	iBuffer = 512;
+
 char
 	sFile[512],
 	sSection[512],
-	g_sFeatureSkin[][] = {"Skin_List", "Skin_Menu"};
+	g_sFeatureSkin[][] = {"Skins", "Skin_Menu"};
 
 enum struct Settings
 {
-	char name_t[512];
-	char name_ct[512];
-	char model_t[512];
-	char model_ct[512];
+	char name_t[5512];
+	char name_ct[5512];
+	char model_t[5512];
+	char model_ct[5512];
 	bool enable_t;
 	bool enable_ct;
 	bool enable;
@@ -56,12 +59,12 @@ enum struct ModelsAll
 
 	void Ads()
 	{
-		this.id_t = new ArrayList(ByteCountToCells(512));
-		this.id_ct = new ArrayList(ByteCountToCells(512));
-		this.name_t = new ArrayList(ByteCountToCells(512));
-		this.name_ct = new ArrayList(ByteCountToCells(512));
-		this.model_t = new ArrayList(ByteCountToCells(512));
-		this.model_ct = new ArrayList(ByteCountToCells(512));
+		this.id_t = new ArrayList(ByteCountToCells(iBuffer));
+		this.id_ct = new ArrayList(ByteCountToCells(iBuffer));
+		this.name_t = new ArrayList(ByteCountToCells(iBuffer));
+		this.name_ct = new ArrayList(ByteCountToCells(iBuffer));
+		this.model_t = new ArrayList(ByteCountToCells(iBuffer));
+		this.model_ct = new ArrayList(ByteCountToCells(iBuffer));
 	}
 
 	void Reset()
@@ -93,9 +96,10 @@ enum struct ModelsAll
 			array.GetString(i, sBuffer, sizeof(sBuffer));
 			if (sBuffer[0])
 			{
-				// LogToFile(sFile, "Кеш [%d] модели [%s]", sizeof(sBuffer), sBuffer);
+				//LogToFile(sFile, "Кеш [%d] модели [%s]", sizeof(sBuffer), sBuffer);
 				PrecacheModel(sBuffer);
 				Downloader_AddFileToDownloadsTable(sBuffer);
+				//LogToFile(sFile, "Првоерка 8 Процесс");
 			}
 		}
 	}
@@ -104,6 +108,7 @@ enum struct ModelsAll
 	{
 		this.ProcessModelArray(this.model_t);
 		this.ProcessModelArray(this.model_ct);
+		//LogToFile(sFile, "Првоерка 8 Завершение");
 	}
 }
 
@@ -123,13 +128,13 @@ enum struct Models
 
 	void Ads()
 	{
-		this.id = new ArrayList(ByteCountToCells(512));
-		this.id_t = new ArrayList(ByteCountToCells(512));
-		this.id_ct = new ArrayList(ByteCountToCells(512));
-		this.name_t = new ArrayList(ByteCountToCells(512));
-		this.name_ct = new ArrayList(ByteCountToCells(512));
-		this.model_t = new ArrayList(ByteCountToCells(512));
-		this.model_ct = new ArrayList(ByteCountToCells(512));
+		this.id = new ArrayList(ByteCountToCells(iBuffer));
+		this.id_t = new ArrayList(ByteCountToCells(iBuffer));
+		this.id_ct = new ArrayList(ByteCountToCells(iBuffer));
+		this.name_t = new ArrayList(ByteCountToCells(iBuffer));
+		this.name_ct = new ArrayList(ByteCountToCells(iBuffer));
+		this.model_t = new ArrayList(ByteCountToCells(iBuffer));
+		this.model_ct = new ArrayList(ByteCountToCells(iBuffer));
 	}
 
 	void Reset()
@@ -193,7 +198,6 @@ public void OnPluginStart()
 	BuildPath(Path_SM, sFile, sizeof(sFile), "logs/vip_skin.log");
 
 	ProcessConfigFile(path);
-
 	AutoExecConfig(true, "Skins", "vip");
 
 	if(VIP_IsVIPLoaded()) VIP_OnVIPLoaded();
@@ -272,7 +276,7 @@ Action Cmd_Skin(int client, any args)
 
 public void VIP_OnVIPClientAdded(int client, int admin)
 {
-	//LogToFile(sFile, "Игроком [%N] получен ViP | Статус функции [%d]", client, VIP_IsClientFeatureUse(client, g_sFeatureSkin[0]));
+	////LogToFile(sFile, "Игроком [%N] получен ViP | Статус функции [%d]", client, VIP_IsClientFeatureUse(client, g_sFeatureSkin[0]));
 
 	QueryConnect(client);
 }

@@ -3,10 +3,17 @@
 
 #define STRING(%1) %1, sizeof(%1)
 
+char sFileLog[512];
+
 stock int Downloader_ParseMDL(const char[] model, char[] internal, int maxlen1, char[][] files, int maxsize, int maxlen2)
 {
+	BuildPath(Path_SM, sFileLog, sizeof(sFileLog), "logs/smartdm.log");
+	
 	if(!FileExists2(model))
-		return 0;
+	{
+		//LogToFile(sFileLog, "Ошибка: файл [%s] не найден", model);
+        return 0;
+	}
 
 	int m_iID;
 	int m_iVersion;
@@ -17,10 +24,13 @@ stock int Downloader_ParseMDL(const char[] model, char[] internal, int maxlen1, 
 	int m_iNameOffset = 0;
 	int m_iIdx = 0;
 
+	//LogToFile(sFileLog, "Парсер 1.0 [%s]", model);
+
 	Handle m_hFile = OpenFile2(model, "rb");
-	if(m_hFile==INVALID_HANDLE)
+	if(m_hFile == null)
 		return 0;
 
+	//LogToFile(sFileLog, "Парсер 1.1 [%s]", model);
 	ReadFileCell(m_hFile, m_iID, 4);
 	ReadFileCell(m_hFile, m_iVersion, 4);
 	FileSeek(m_hFile, 4, SEEK_CUR);
@@ -33,8 +43,9 @@ stock int Downloader_ParseMDL(const char[] model, char[] internal, int maxlen1, 
 	ReadFileCell(m_hFile, m_iDirOffset, 4);
 
 	char m_szPath[PLATFORM_MAX_PATH];
-	if(m_iDirNum!=0)
+	if(m_iDirNum != 0)
 	{
+		//LogToFile(sFileLog, "Парсер 1.2 [%s]", model);
 		FileSeek(m_hFile, m_iDirOffset, SEEK_SET);
 		ReadFileCell(m_hFile, m_iDirOffset, 4);
 		FileSeek(m_hFile, m_iDirOffset, SEEK_SET);
@@ -42,15 +53,24 @@ stock int Downloader_ParseMDL(const char[] model, char[] internal, int maxlen1, 
 	}
 
 	char m_szMaterial[PLATFORM_MAX_PATH];
-	for(m_iIdx=0;m_iIdx<m_iNum;++m_iIdx)
+	//for(m_iIdx=0; m_iIdx<m_iNum;++m_iIdx) 
+	for(m_iIdx=0; m_iIdx<36;++m_iIdx) 
 	{
+		//LogToFile(sFileLog, "Парсер 1.3 [%s]", model);
 		FileSeek(m_hFile, m_iOffset+m_iIdx*64, SEEK_SET);
+		//LogToFile(sFileLog, "Парсер 1.3.1 [%s] | position [%d] | where [%d]", model, m_iOffset+m_iIdx*64, SEEK_SET);
 		ReadFileCell(m_hFile, m_iNameOffset, 4);
+		//LogToFile(sFileLog, "Парсер 1.3.2 [%s] | position [%d] | where [%d]", model, m_iNameOffset, 4);
 		FileSeek(m_hFile, m_iNameOffset-4, SEEK_CUR);
+		//LogToFile(sFileLog, "Парсер 1.3.3 [%s] | position [%d] | where [%d]", model, m_iNameOffset-4, SEEK_SET);
 		ReadFileString(m_hFile, STRING(m_szMaterial));
-
-		Format(files[m_iIdx], maxlen2, "materials\\%s%s.vmt", m_szPath, m_szMaterial);
+		//LogToFile(sFileLog, "Парсер 1.3.4 [%s] | Считывание файла | Количество проходов [%d] | Счёт [%d]", model, m_iNum, m_iIdx);
+		Format(files[m_iIdx], sizeof(files[][]), "materials\\%s%s.vmt", m_szPath, m_szMaterial);
+		//LogToFile(sFileLog, "Парсер 1.3.5 [%s] | Считывание файла | materials\\%s%s.vmt", model, m_szPath, m_szMaterial);
+		//LogToFile(sFileLog, "Парсер 1.3.6 [%s] | Считывание файла | Файл [%s][%d]", model, files[m_iIdx], m_iIdx);
 	}
+
+	//LogToFile(sFileLog, "Парсер 1.5 [%s] m_iNum [%d]", model, m_iNum);
 
 	return m_iNum;
 }
@@ -140,6 +160,7 @@ Handle g_hCachedFiles = INVALID_HANDLE;
 Handle g_hCachedNums = INVALID_HANDLE;
 stock int Downloader_AddFileToDownloadsTable(char[] filename)
 {
+	BuildPath(Path_SM, sFileLog, sizeof(sFileLog), "logs/smartdm.log");
 	int len = strlen(filename);
 	ReplaceString(filename, len, "\\", "/");
 	for(int ch=0; ch<len; ch++){
@@ -155,6 +176,7 @@ stock int Downloader_AddFileToDownloadsTable(char[] filename)
 		g_hCachedFiles = CreateArray(PLATFORM_MAX_PATH);
 	}
 
+	//LogToFile(sFileLog, "Идёт загрузка [%s]", filename);
 	AddFileToDownloadsTable(filename);
 
 	int m_iValue;
@@ -172,6 +194,8 @@ stock int Downloader_AddFileToDownloadsTable(char[] filename)
 		return true;
 	}
 
+	//LogToFile(sFileLog, "Проверка 1 ");
+
 	char m_szExt[16];
 	int m_iDot = FindCharInString(filename, '.', true);
 	if(m_iDot == -1)
@@ -180,17 +204,26 @@ stock int Downloader_AddFileToDownloadsTable(char[] filename)
 	int m_iNumFiles = 0;
 
 	strcopy(m_szExt, sizeof(m_szExt), filename[m_iDot]);
-	char m_szMaterials[16][PLATFORM_MAX_PATH];
+	char m_szMaterials[36][PLATFORM_MAX_PATH];
 	int m_iNum;
+	//LogToFile(sFileLog, "Проверка 2 ");
 	if(strcmp(m_szExt, ".mdl") == 0)
 	{
+		//LogToFile(sFileLog, "Проверка 4 Модели ");
 		char m_szFiles[sizeof(g_szModelExts)][PLATFORM_MAX_PATH];
 		char m_szInternal[64];
 
+		//LogToFile(sFileLog, "Проверка 4.1 Модели filename [%s] | STRING [%d] | m_szMaterials [%s] | sizeof [%d] m_szMaterials[] [%d]| ",
+		 //filename, STRING(m_szInternal), m_szMaterials, sizeof(m_szMaterials), sizeof(m_szMaterials[]));
+
 		m_iNum = Downloader_ParseMDL(filename, STRING(m_szInternal), m_szMaterials, sizeof(m_szMaterials), sizeof(m_szMaterials[]));
+
+		//LogToFile(sFileLog, "Проверка 4.2 Модели m_iNum [%d]", m_iNum);
+
 		for(int i=0;i<m_iNum;++i)
 		{
 			if(FileExists2(m_szMaterials[i])){
+				//LogToFile(sFileLog, "Проверка 4.3 Модели [%s]", m_szMaterials[i]);
 				m_iNumFiles += Downloader_AddFileToDownloadsTable(m_szMaterials[i])+1;
 			}
 		}
@@ -200,17 +233,18 @@ stock int Downloader_AddFileToDownloadsTable(char[] filename)
 			m_iNumFiles += Downloader_AddFileToDownloadsTable(m_szFiles[i])+1;
 	} else if(strcmp(m_szExt, ".vmt") == 0)
 	{
+		//LogToFile(sFileLog, "Проверка 5 Материалы ");
 		m_iNum = Downloader_GetMaterialsFromVMT(filename, m_szMaterials, sizeof(m_szMaterials), sizeof(m_szMaterials[]));
 		char m_szMaterial[PLATFORM_MAX_PATH];
 		for(int i=0;i<m_iNum;++i)
 		{
 			Format(m_szMaterial, sizeof(m_szMaterial), "materials\\%s.vtf", m_szMaterials[i]);
-
+			//LogToFile(sFileLog, "Определяем материалы [%s]", m_szMaterial);
 			if(FileExists2(m_szMaterial))
 				m_iNumFiles += Downloader_AddFileToDownloadsTable(m_szMaterial)+1;
 		}
 	}
-
+	//LogToFile(sFileLog, "Проверка 3 ");
 	PushArrayString(g_hCachedFiles, filename);
 	SetTrieValue(g_hCachedNums, filename, m_iNumFiles);
 

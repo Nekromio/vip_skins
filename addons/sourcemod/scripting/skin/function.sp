@@ -20,7 +20,7 @@ stock void FetchGroupModelIDs(int client)
 }
 
 //	Фильтруем весь список доступных моделей группы польователя
-//  На основании доступных id узнаём именя и пути моделей
+//  На основании доступных id узнаём именяем им пути моделей
 //  И распределяем их на Т и КТ
 stock void AssignModelsToTeams(int client)
 {
@@ -90,7 +90,7 @@ stock void setDefaultSkin(int client, bool team_t = false, bool team_ct = false)
 		list[client].model_t.GetString(0, sBuffer, sizeof(sBuffer));
 		skin[client].model_t = sBuffer;
 
-		//LogToFile(sFile, "Установлен по стандарту скин для Т [%s]", sBuffer);
+		////LogToFile(sFile, "Установлен по стандарту скин для Т [%s]", sBuffer);
 	}	
 
 	if(!team_ct && list[client].name_ct.Length)
@@ -100,7 +100,7 @@ stock void setDefaultSkin(int client, bool team_t = false, bool team_ct = false)
 		list[client].model_ct.GetString(0, sBuffer, sizeof(sBuffer));
 		skin[client].model_ct = sBuffer;
 
-		//LogToFile(sFile, "Установлен по стандарту скин для КТ [%s]", sBuffer);
+		////LogToFile(sFile, "Установлен по стандарту скин для КТ [%s]", sBuffer);
 	}
 }
 
@@ -164,13 +164,13 @@ stock void SetModel(int client)
 
 	if(skin[client].enable_t && team == 2 && skin[client].model_t[0])
 	{
-		/* LogToFile(sFile, "Установка игроку Т [%N] скина [%s]", client, skin[client].model_t);
+		/* //LogToFile(sFile, "Установка игроку Т [%N] скина [%s]", client, skin[client].model_t);
 		PrintToChatAll("Установка игроку [%N] скина [%s]", client, skin[client].model_t); */
 		SetEntityModel(client, skin[client].model_t);
 	}
 	else if(skin[client].enable_ct && team == 3 && skin[client].model_ct[0])
 	{
-		/* LogToFile(sFile, "Установка игроку КТ [%N] скина [%s]", client, skin[client].model_ct);
+		/* //LogToFile(sFile, "Установка игроку КТ [%N] скина [%s]", client, skin[client].model_ct);
 		PrintToChatAll("Установка игроку [%N] скина [%s]", client, skin[client].model_ct); */
 		SetEntityModel(client, skin[client].model_ct);
 	}
