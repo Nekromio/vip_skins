@@ -3,7 +3,7 @@ Vip player models
 Group key  
 /addons/sourcemod/data/vip/cfg/groups.ini
 ```c++
-"Skin_List"			"t_leet;ct_gign"
+"Skins"			"t_leet;ct_gign"
 ```
 
 Translations key  
