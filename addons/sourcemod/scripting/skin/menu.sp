@@ -1,6 +1,5 @@
 void CreatMenu_Base(int client)
 {
-
 	if(!IsValideClient(client))
 		return;
 		

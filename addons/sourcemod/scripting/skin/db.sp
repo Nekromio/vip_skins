@@ -91,7 +91,7 @@ public void ConnectClient_Callback(Database hDatabaseLocal, DBResultSet hResults
 		{
 			//Обновляем данные о моделях
 			dataUpdate(client);
-			//Устанавливаем саму первую модель и активируем
+			//Устанавливаем самую первую модель и активируем
 			setDefaultSkin(client);
 
 			char sQuery[512], sSteam[32];
@@ -110,8 +110,8 @@ public void ClietnAddDB_Callback(Database hDatabaseLocal, DBResultSet hResults, 
 {
 	if(sError[0])
 	{
-		LogError("ClietnAddDB_Callback: %s", sError); //
-		return; //
+		LogError("ClietnAddDB_Callback: %s", sError);
+		return;
 	}
 }
 
@@ -132,8 +132,8 @@ public void SaveSettings_Callback(Database hDatabaseLocal, DBResultSet hResults,
 {
 	if(sError[0])
 	{
-		LogError("SaveSettings_Callback: %s", sError); //
-		return; //
+		LogError("SaveSettings_Callback: %s", sError);
+		return;
 	}
 }
 

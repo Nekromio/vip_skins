@@ -26,10 +26,10 @@ char
 
 enum struct Settings
 {
-	char name_t[5512];
-	char name_ct[5512];
-	char model_t[5512];
-	char model_ct[5512];
+	char name_t[512];
+	char name_ct[512];
+	char model_t[512];
+	char model_ct[512];
 	bool enable_t;
 	bool enable_ct;
 	bool enable;
@@ -96,10 +96,8 @@ enum struct ModelsAll
 			array.GetString(i, sBuffer, sizeof(sBuffer));
 			if (sBuffer[0])
 			{
-				//LogToFile(sFile, "Кеш [%d] модели [%s]", sizeof(sBuffer), sBuffer);
 				PrecacheModel(sBuffer);
 				Downloader_AddFileToDownloadsTable(sBuffer);
-				//LogToFile(sFile, "Првоерка 8 Процесс");
 			}
 		}
 	}
@@ -108,7 +106,6 @@ enum struct ModelsAll
 	{
 		this.ProcessModelArray(this.model_t);
 		this.ProcessModelArray(this.model_ct);
-		//LogToFile(sFile, "Првоерка 8 Завершение");
 	}
 }
 
@@ -174,7 +171,7 @@ public Plugin myinfo =
 	name = "[ViP Core] Player Skins",
 	author = "Nek.'a 2x2 | ggwp.site",
 	description = "Player Skins",
-	version = "1.0.0 104",
+	version = "1.0.0 106",
 	url = "https://ggwp.site/"
 };
 
@@ -276,8 +273,7 @@ Action Cmd_Skin(int client, any args)
 
 public void VIP_OnVIPClientAdded(int client, int admin)
 {
-	////LogToFile(sFile, "Игроком [%N] получен ViP | Статус функции [%d]", client, VIP_IsClientFeatureUse(client, g_sFeatureSkin[0]));
-
+	//LogToFile(sFile, "Игроком [%N] получен ViP | Статус функции [%d]", client, VIP_IsClientFeatureUse(client, g_sFeatureSkin[0]));
 	QueryConnect(client);
 }
 
