@@ -9,7 +9,7 @@ Group key
 Translations key  
 /addons/sourcemod/translations/vip_modules.phrases.txt
 ```c++
-  	"Skin_Menu"
+  	"Skins"
 	{
 		"en"		"Skin Menu"
 		"ru"		"Меню Скинов"
