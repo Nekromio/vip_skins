@@ -171,15 +171,17 @@ public Plugin myinfo =
 	name = "[ViP Core] Player Skins",
 	author = "Nek.'a 2x2 | ggwp.site",
 	description = "Player Skins",
-	version = "1.0.0 106",
+	version = "1.0.0 107",
 	url = "https://ggwp.site/"
 };
 
 public void OnPluginStart()
 {
-	cvEnable = CreateConVar("sm_vip_skin_enable", "1", "Включить/Выключить плагин", _, true, _, true, 1.0);
+	cvEnable = CreateConVar("sm_vip_skin_enable", "1", "Включить/Выключить плагин", _, true, 0.0, true, 1.0);
 
-	cvDelayTime = CreateConVar("sm_vip_skin_enable", "0.1", "Через сколько секунд будет установлена модель", _, true, _, true, 60.0);
+	cvDelayTime = CreateConVar("sm_vip_skin_delay_time", "0.1", "Через сколько секунд будет установлена модель", _, true, 0.0, true, 60.0);
+
+	AutoExecConfig(true, "Skins", "vip");
 
 	for(int i = 0; i <= MaxClients; i++)
 	{
@@ -195,7 +197,6 @@ public void OnPluginStart()
 	BuildPath(Path_SM, sFile, sizeof(sFile), "logs/vip_skin.log");
 
 	ProcessConfigFile(path);
-	AutoExecConfig(true, "Skins", "vip");
 
 	if(VIP_IsVIPLoaded()) VIP_OnVIPLoaded();
 }
